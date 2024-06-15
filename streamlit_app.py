@@ -7,6 +7,15 @@ from sklearn.metrics import mean_squared_error, r2_score
 import altair as alt
 import time
 import zipfile
+from utils import MMS_DATA, EXAMPLE_DATA_, REF_DATA_
+from patchOTDA.external import skada
+from patchOTDA.domain_adapt import PatchClampOTDA
+from functools import partial
+import ot.da
+
+#MODELS 
+MODELS = {'JDOT (Joint Distribution Optimal Transport) - Semisupervised - unevenly Sampled': {'model': skada.JDOT, 'params': {'alpha': 0.1, 'n_iter': 1000, 'verbose': False}, 'Description':''},
+        'EMDLaplace (EMD based distance transport) - Unsupervised': {'model': partial(PatchClampOTDA(ot.da.EMDLaplaceTransport, flexable_transporter=False)), 'params': {'alpha': 0.1, 'n_iter': 1000, 'verbose': False}, 'Description':''},}
 
 # Page title
 st.set_page_config(page_title='Smestern: Map My Spikes Challenge 2024', page_icon='')
@@ -42,36 +51,33 @@ with st.sidebar:
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file, index_col=False)
       
-    # Download example data
-    @st.cache_data
-    def convert_df(input_df):
-        return input_df.to_csv(index=False).encode('utf-8')
-    example_csv = pd.read_csv('https://raw.githubusercontent.com/dataprofessor/data/master/delaney_solubility_with_descriptors.csv')
-    csv = convert_df(example_csv)
-    st.download_button(
-        label="Download example CSV",
-        data=csv,
-        file_name='delaney_solubility_with_descriptors.csv',
-        mime='text/csv',
-    )
-
+    
     # Select example data
     st.markdown('**1.2. Use example data**')
+    dataset_selected = st.selectbox('Select data to map', EXAMPLE_DATA_)
     example_data = st.toggle('Load example data')
     if example_data:
-        df = pd.read_csv('https://raw.githubusercontent.com/dataprofessor/data/master/delaney_solubility_with_descriptors.csv')
+        df = MMS_DATA[dataset_selected]
 
     st.header('2. Set Parameters')
     parameter_split_size = st.slider('Data split ratio (% for Training Set)', 10, 90, 80, 5)
 
-    st.subheader('2.1. Learning Parameters')
+    st.subheader('2.1. Reference Data')
     with st.expander('See parameters'):
-        parameter_n_estimators = st.slider('Number of estimators (n_estimators)', 0, 1000, 100, 100)
-        parameter_max_features = st.select_slider('Max features (max_features)', options=['all', 'sqrt', 'log2'])
-        parameter_min_samples_split = st.slider('Minimum number of samples required to split an internal node (min_samples_split)', 2, 10, 2, 1)
-        parameter_min_samples_leaf = st.slider('Minimum number of samples required to be at a leaf node (min_samples_leaf)', 1, 10, 2, 1)
+        ref_data = st.selectbox('Reference data', REF_DATA_)
+        ref_data = MMS_DATA[ref_data]
+    
+    st.subheader('2.2. Model Selection')
+    model = st.selectbox('Select model', list(MODELS.keys()))
+    model_params = MODELS[model]['params']
+    st.subheader('2.3. Learning Parameters')
+    with st.expander('See parameters', expanded=False):
+        #get from model
+        for key, value in model_params.items():
+            if 'alpha' in key or 'reg' in key:
+                model_params[key] = st.slider(key, 0.0, 1.0, value, 0.01)
 
-    st.subheader('2.2. General Parameters')
+    st.subheader('2.4. General Parameters')
     with st.expander('See parameters', expanded=False):
         parameter_random_state = st.slider('Seed number (random_state)', 0, 1000, 42, 1)
         parameter_criterion = st.select_slider('Performance measure (criterion)', options=['squared_error', 'absolute_error', 'friedman_mse'])
@@ -80,8 +86,11 @@ with st.sidebar:
 
     sleep_time = st.slider('Sleep time', 0, 3, 0)
 
+    st.header('3. Run Model')
+    run_model = st.button('Run model')
+
 # Initiate the model building process
-if uploaded_file or example_data: 
+if run_model: 
     with st.status("Running ...", expanded=True) as status:
     
         st.write("Loading data ...")
