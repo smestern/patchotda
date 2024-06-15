@@ -2,3 +2,5 @@ streamlit==1.29.0
 pandas>=1.3.0
 scikit-learn
 altair>=4.0
+git+https://github.com/scikit-adaptation/skada
+git+https://github.com/smestern/pypatchOTDA.git
