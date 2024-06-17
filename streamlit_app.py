@@ -44,14 +44,14 @@ st.title('Map My Spikes Challenge 2024 - Smestern Entry')
 
 with st.expander('About this app'):
   st.markdown('**What can this app do?**')
-  st.info('''This app aims to provide a user friendly interface to intergrate patch-clamp datasets from variety of conditions and species. 
-          He we employ domain adaptation methods and Hierarchical classification to predict the cell types of the user data. 
-            The app uses the PatchOTDA library to perform the domain adaptation and the HiClass library to perform the hierarchical classification.
-          This app was created by Smestern for the Map My Spikes Challenge 2024: https://alleninstitute.org/events/mapmyspikes/
-          ''')
+  st.markdown('''This app aims to provide a user friendly interface to intergrate patch-clamp datasets from variety of conditions and species.   
+        He we employ domain adaptation methods and Hierarchical classification to predict the cell types of the user data.   
+        The app uses the PatchOTDA library to perform the domain adaptation and the HiClass library to perform the hierarchical classification.  
+        This app was created by Smestern for the Map My Spikes Challenge 2024: https://alleninstitute.org/events/mapmyspikes/  
+        ''')
 
   st.markdown('**How to use the app?**')
-  st.warning('''One can upload their own data or use the example data sets provided. 
+  st.markdown('''One can upload their own data or use the example data sets provided. 
             The user can select the reference data and the labels to be used for the label propagation. 
             Its recommended to select the only the reference labels that are relevant to the user data.
             E.g. If the user data is from Sst, subselect the SSt labels.
@@ -62,7 +62,8 @@ with st.expander('About this app'):
                This is a limitation of the current version of the app.   
               In the future, I intend to allow the user to indicate feature matches between their data and the example data.   
               Users may be interested in computing their own features and using the app to predict cell types based on these features.  
-              I recommened the Allen institute's IPFX library for this purpose: [IPFX](https://ipfx.readthedocs.io/en/latest/)
+              I recommened the Allen institute's IPFX library for this purpose: [IPFX](https://ipfx.readthedocs.io/en/latest/).
+              
               ''')
   st.markdown("""The app is still in development and may have bugs. If you encounter any issues, please let me know.""")
 
