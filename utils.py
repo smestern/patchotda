@@ -2,13 +2,12 @@ import numpy as np
 import pandas as pd
 import pickle as pkl
 import os
-from patchOTDA.datasets import MMS_DATA
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler, StandardScaler
 from sklearn.impute import SimpleImputer, KNNImputer
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
 
-
+MMS_DATA = pkl.load(open('MMS_DATA.pkl', 'rb'))
 EXAMPLE_DATA_ = ['Query1', 'Query2', 'Query3', 'CTKE_M1', 'VISp_Viewer']
 
 REF_DATA_ = ['CTKE_M1', 'VISp_Viewer']

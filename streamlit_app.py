@@ -27,8 +27,8 @@ import xgboost as xgb
 
 #MODELS 
 MODELS = {
-        'EMDLaplace (EMD based distance transport) - Unsupervised': {'model': ot.da.EMDLaplaceTransport, 'params': {'reg_lap': (0., 10., 10.), 'reg_src':(0., 10., 0.9), 'verbose': False}, 'Description':''},
-        'UnbalancedSinkhornTransport (Optimal Transport) - Unsupervised - unevenly Sampled': {'model': ot.da.UnbalancedSinkhornTransport, 'params': {'reg_e': (0., 2., 0.1), 'reg_m': (0., 2., 0.1), 'max_iter': (10, 10000, 1000), 'verbose': False}, 'Description':''},
+        'EMDLaplace (EMD based distance transport) - Unsupervised': {'model': ot.da.EMDLaplaceTransport, 'params': {'reg_lap': (0., 10., 10.), 'reg_src':(0., 10., 0.9), 'norm': ['median', None,  'max'], 'verbose': False}, 'Description':''},
+        'UnbalancedSinkhornTransport (Optimal Transport) - Unsupervised - unevenly Sampled': {'model': ot.da.UnbalancedSinkhornTransport, 'params': {'reg_e': (0., 2., 0.1), 'reg_m': (0., 2., 0.1), 'max_iter': (10, 10000, 1000), 'norm': [None, 'median', 'max'], 'verbose': False}, 'Description':''},
         'JDOT (Joint Distribution Optimal Transport) - Semisupervised - unevenly Sampled': {'model': skada.JDOTC, 'params': {'alpha': (0, 10, 0.1), 'n_iter_max': (10, 10000, 1000)}, 'Description':''}}
 
 CLASS_MODELS = {'XGBoost': {'model': xgb.XGBClassifier, 'params': {'n_estimators': (1, 1000, 100), 'max_depth':(1, 100, 2), 'learning_rate':(0.0, 1.0, 0.1)}, 'Description':''},
@@ -39,22 +39,24 @@ CLASS_MODELS = {'XGBoost': {'model': xgb.XGBClassifier, 'params': {'n_estimators
 SCALERS = {'Standard Scaler': StandardScaler, 'MinMax Scaler': MinMaxScaler}
 
 # Page title
-st.set_page_config(page_title='Map My Spikes Challenge 2024 - Smestern Entry', page_icon='')
-st.title('Map My Spikes Challenge 2024 - Smestern Entry')
+st.set_page_config(page_title='PATCHOTDA: Map My Spikes Challenge 2024 - Smestern Entry', page_icon='')
+st.title('PATCHOTDA: Map My Spikes Challenge 2024 - Smestern Entry')
 
 with st.expander('About this app'):
   st.markdown('**What can this app do?**')
-  st.markdown('''This app aims to provide a user friendly interface to intergrate patch-clamp datasets from variety of conditions and species.   
-        He we employ domain adaptation methods and Hierarchical classification to predict the cell types of the user data.   
-        The app uses the PatchOTDA library to perform the domain adaptation and the HiClass library to perform the hierarchical classification.  
+  st.markdown('''This app aims to provide a user friendly interface to intergrate patch-clamp datasets from variety of conditions and species. He we employ domain adaptation methods and Hierarchical classification to predict the cell types of the user data. The app uses the PatchOTDA library to perform the domain adaptation and the HiClass library to perform the hierarchical classification.  
         This app was created by Smestern for the Map My Spikes Challenge 2024: https://alleninstitute.org/events/mapmyspikes/  
         ''')
 
   st.markdown('**How to use the app?**')
-  st.markdown('''One can upload their own data or use the example data sets provided. 
-            The user can select the reference data and the labels to be used for the label propagation. 
+  st.markdown('''One can upload their own data or use the example data sets provided. The user can select the reference data and the labels to be used for the label propagation. 
             Its recommended to select the only the reference labels that are relevant to the user data.
-            E.g. If the user data is from Sst, subselect the SSt labels.
+            E.g. If the user data is from Sst, subselect the Sst labels.
+            Next select the domain adaptation model and the classifier model. For domain Adaptation, the user can select from the following models:
+                - EMDLaplace (EMD based distance transport) - Fully Unsupervised optimal transport regularizated by the laplacian. Recommended for evenly sampled data from the same distribution (E.g. All Cortex data)
+                - UnbalancedSinkhornTransport (Optimal Transport) - Fully Unsupervised optimal transport regularizated by the mass. Recommended for unevenly sampled data from the same distribution (E.g. All Cortex data, majority Sst in the sample data)
+                - JDOT (Joint Distribution Optimal Transport) - Semi-supervised optimal transport regularizated by the laplacian. Recommended for unevenly sampled data. *Can be finicky* (E.g. Cortex and Thalamus data)
+
             ''')
 
   st.markdown('**NOTE: Using your own data**')
