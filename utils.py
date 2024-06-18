@@ -7,7 +7,7 @@ from sklearn.impute import SimpleImputer, KNNImputer
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
 folder = os.path.dirname(os.path.abspath(__file__))
-MMS_DATA = pkl.load(open('./mms_data.pkl'), 'rb')
+MMS_DATA = pkl.load(open('./mms_data.pkl', 'rb'))
 MMS_DATA = {}
 EXAMPLE_DATA_ = ['Query1', 'Query2', 'Query3', 'CTKE_M1', 'VISp_Viewer']
 
