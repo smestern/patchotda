@@ -6,8 +6,8 @@ from sklearn.preprocessing import LabelEncoder, MinMaxScaler, StandardScaler
 from sklearn.impute import SimpleImputer, KNNImputer
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
-
-MMS_DATA = pkl.load(open('MMS_DATA.pkl', 'rb'))
+folder = os.path.dirname(__file__)
+MMS_DATA = pkl.load(open(os.path.join(folder,'mms_data.pkl'), 'rb'))
 EXAMPLE_DATA_ = ['Query1', 'Query2', 'Query3', 'CTKE_M1', 'VISp_Viewer']
 
 REF_DATA_ = ['CTKE_M1', 'VISp_Viewer']
