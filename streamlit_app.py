@@ -46,6 +46,7 @@ st.set_page_config(page_title='PATCHOTDA: Map My Spikes Challenge 2024 - Smester
 st.title('PATCHOTDA: Map My Spikes Challenge 2024 - Smestern Entry')
 st.write(os.getcwd())
 st.write(os.path.abspath(__file__))
+st.write(os.listdir())
 
 with st.expander('About this app'):
   st.markdown('**What can this app do?**')
