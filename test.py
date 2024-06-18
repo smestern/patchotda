@@ -1,45 +1,44 @@
 from utils import *
 
 def test_filter_MMS():
-    filter_MMS('VISp_Viewer', 'VISp_T_3', {
+    filter_MMS('VISp_Viewer', 'VISp_MET_3', {
   "checked": [
+    "inhibitory",
+    "Lamp5",
+    "Lamp5-MET-1",
+    "Lamp5-MET-2",
+    "Pvalb",
+    "Pvalb-MET-1",
+    "Pvalb-MET-2",
+    "Pvalb-MET-3",
+    "Pvalb-MET-4",
+    "Pvalb-MET-5",
+    "Sncg",
+    "Sncg-MET-1",
+    "Sncg-MET-2",
+    "Sncg-MET-3",
     "Sst",
-    "Sst_Calb2",
-    "Sst_Calb2_Necab1",
-    "Sst_Calb2_Pdlim5",
-    "Sst_Chodl",
-    "Sst_Chrna2",
-    "Sst_Chrna2_Glra3",
-    "Sst_Chrna2_Ptgdr",
-    "Sst_Crh",
-    "Sst_Crh_4930553C11Rik",
-    "Sst_Crhr2",
-    "Sst_Crhr2_Efemp1",
-    "Sst_Esm1",
-    "Sst_Hpse",
-    "Sst_Hpse_Cbln4",
-    "Sst_Hpse_Sema3c",
-    "Sst_Mme",
-    "Sst_Mme_Fam114a1",
-    "Sst_Myh8",
-    "Sst_Myh8_Etv1",
-    "Sst_Myh8_Fibin",
-    "Sst_Nr2f2",
-    "Sst_Nr2f2_Necab1",
-    "Sst_Nts",
-    "Sst_Rxfp1",
-    "Sst_Rxfp1_Eya1",
-    "Sst_Rxfp1_Prdm8",
-    "Sst_Tac1",
-    "Sst_Tac1_Htr1d",
-    "Sst_Tac1_Tacr3",
-    "Sst_Tac2",
-    "Sst_Tac2_Myh4",
-    "Sst_Tac2_Tacstd2"
+    "Sst-MET-1",
+    "Sst-MET-10",
+    "Sst-MET-11",
+    "Sst-MET-12",
+    "Sst-MET-13",
+    "Sst-MET-2",
+    "Sst-MET-3",
+    "Sst-MET-4",
+    "Sst-MET-5",
+    "Sst-MET-6",
+    "Sst-MET-7",
+    "Sst-MET-8",
+    "Sst-MET-9",
+    "Vip",
+    "Vip-MET-1",
+    "Vip-MET-2",
+    "Vip-MET-3",
+    "Vip-MET-4",
+    "Vip-MET-5"
   ],
-  "expanded": [
-    "inhibitory"
-  ]
+  "expanded": []
 } )
 
 if __name__ == '__main__':

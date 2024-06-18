@@ -33,11 +33,11 @@ MODELS = {
         'UnbalancedSinkhornTransport (Optimal Transport) - Unsupervised - unevenly Sampled': {'model': ot.da.UnbalancedSinkhornTransport, 'params': {'reg_e': (0., 2., 0.1), 'reg_m': (0., 2., 0.1), 'max_iter': (10, 10000, 1000), 'norm': [None, 'median', 'max'], 'verbose': False}, 'Description':''},
         'JDOT (Joint Distribution Optimal Transport) - Semisupervised - unevenly Sampled': {'model': skada.JDOTC, 'params': {'alpha': (0, 10, 0.1), 'n_iter_max': (10, 10000, 1000)}, 'Description':''}}
 
-CLASS_MODELS = {'Random Forest': {'model': RandomForestClassifier, 'params': {'n_estimators': (1, 1000, 100), 'max_depth': [50, None, 3, 5, 25, 100, 200], 'min_samples_split':(1, 100, 2), 'min_samples_leaf':(1, 100, 2), 'min_impurity_decrease':(0.0, 100., 0.0)}, 'Description':''},
-                'XGBoost': {'model': xgb.XGBClassifier, 'params': {'n_estimators': (1, 1000, 100), 'max_depth':(1, 100, 2), 'learning_rate':(0.0, 1.0, 0.1)}, 'Description':''},
+CLASS_MODELS = {'Random Forest': {'model': RandomForestClassifier, 'params': {'n_estimators': (1, 1000, 100, 3), 'max_depth': [50, None, 3, 5, 25, 100, 200], 'min_samples_split':(1, 100, 2, 3), 'min_samples_leaf':(1, 100, 2), 'min_impurity_decrease':(0.0, 100., 0.0, 3)}, 'Description':''},
+                'XGBoost': {'model': xgb.XGBClassifier, 'params': {'n_estimators': (1, 1000, 100, 3), 'max_depth':(1, 100, 2, 4), 'learning_rate':(0.0, 1.0, 0.1, 4)}, 'Description':''},
                 
-                "Logistic Regression": {'model': LogisticRegression, 'params': {'C': (0., 1., 1.0), 'penalty': ['l2', 'l1', 'elasticnet']}, 'Description':''},
-                "SVM": {'model': SVC, 'params': {'C': (0., 1., 1.0), 'kernel': ['rbf', 'linear', 'poly', 'sigmoid']}, 'Description':''}}
+                "Logistic Regression": {'model': LogisticRegression, 'params': {'C': (0., 1., 1.0, 4), 'penalty': ['l2', 'l1', 'elasticnet']}, 'Description':''},
+                "SVM": {'model': SVC, 'params': {'C': (0., 1., 1.0, 4), 'kernel': ['rbf', 'linear', 'poly', 'sigmoid']}, 'Description':''}}
 
 SCALERS = {'Standard Scaler': StandardScaler, 'MinMax Scaler': MinMaxScaler}
 
@@ -128,7 +128,7 @@ with st.sidebar:
                 elif isinstance(value, list):
                     model_params[key] = st.selectbox(key, value)
         st.write('Classifier model parameters:') 
-        grid_search = st.checkbox('Use Grid Search', True)
+        grid_search = st.checkbox('Use Grid Search', False)
         if class_model is not None:
             for key, value in class_model_params.items():
                 if isinstance(value, tuple):
@@ -179,6 +179,7 @@ if run_model:
                 pass
             else:
                 st.write("Filtering reference data ...")
+                st.write(return_tree)
                 idx = filter_MMS(ref_data_name, labels+"_3", return_tree)
                 ref_data_ephys = ref_data_ephys.iloc[idx]
                 ref_data_meta = ref_data_meta.iloc[idx]

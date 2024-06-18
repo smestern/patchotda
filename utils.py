@@ -38,7 +38,7 @@ for data in REF_DATA_:
         else:
             #add to the children, if not already there
             parent = label_split[0]
-            child = '-'.join(label_split)
+            child = '_'.join(label_split)
             
             #check if parent is in the nodes
             if parent not in [x['label'] for x in VISp_MET_nodes[0]['children']]:
@@ -98,8 +98,11 @@ for data in REF_DATA_:
 #build a label encoder for each ref_data
 for data in REF_DATA_:
     mms_temp = MMS_DATA[data]['meta']
+    
     #we want the column
     if 'VISp Viewer MET type' in mms_temp.columns:
+        MMS_DATA[data]['meta'][f'VISp_MET_3'] = MMS_DATA[data]['meta'][f'VISp_MET_2']
+        mms_temp = MMS_DATA[data]['meta']
         for x in [1,2,3]:
             labels = mms_temp[f'VISp_MET_{x}'].fillna('unk').values
             #get the unique labels
@@ -141,7 +144,10 @@ def param_grid_from_dict(param_dict):
     return_dict = {}
     for key, value in param_dict.items():
         if isinstance(value, tuple):
-            return_dict[key] = np.linspace(value[0], value[1], 5).astype(type(value[0]))
+            if len(value) == 4:
+                return_dict[key] = np.linspace(value[0], value[1], value[-1]).astype(type(value[0]))
+            else:
+                return_dict[key] = np.linspace(value[0], value[1], 4).astype(type(value[0]))
         elif isinstance(value, bool):
             return_dict[key] = np.array([True, False])
         elif isinstance(value, list):
@@ -149,7 +155,6 @@ def param_grid_from_dict(param_dict):
     
     return return_dict
 
-param_grid_from_dict({'n_estimators': (1, 1000, 100), 'max_depth': [50, None, 3, 5, 25, 100, 200], 'min_samples_split':(1, 100, 2), 'min_samples_leaf':(1, 100, 2), 'min_impurity_decrease':(0.0, 100., 0.0)})
 
 def find_outlier_idxs(X, n_outliers=10):
     #find the outliers
@@ -158,3 +163,4 @@ def find_outlier_idxs(X, n_outliers=10):
     clf = IsolationForest(contamination=0.1)
     clf.fit(x)
     return np.where(clf.predict(x) == -1)[0] 
+
