@@ -6,7 +6,7 @@ from sklearn.preprocessing import LabelEncoder, MinMaxScaler, StandardScaler
 from sklearn.impute import SimpleImputer, KNNImputer
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
-folder = os.path.dirname(__file__)
+folder = os.path.dirname(os.path.abspath(__file__))
 MMS_DATA = pkl.load(open(os.path.join(folder,'mms_data.pkl'), 'rb'))
 EXAMPLE_DATA_ = ['Query1', 'Query2', 'Query3', 'CTKE_M1', 'VISp_Viewer']
 
@@ -135,6 +135,19 @@ def filter_MMS(data, label_query, query):
     idx = np.nonzero([x in selected_labels for x in labels])[0]
     #get the indices
     return idx
+
+def param_grid_from_dict(param_dict):
+    return_dict = {}
+    for key, value in param_dict.items():
+        if isinstance(value, tuple):
+            return_dict[key] = np.linspace(value[0], value[1], 10).astype(np.float32)
+        elif isinstance(value, bool):
+            return_dict[key] = np.array([True, False])
+        elif isinstance(value, list):
+            return_dict[key] = np.array(value)
+    
+    return return_dict
+
 
 def find_outlier_idxs(X, n_outliers=10):
     #find the outliers

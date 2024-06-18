@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import mean_squared_error, r2_score, accuracy_score
+from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler, StandardScaler
 from sklearn.impute import SimpleImputer, KNNImputer
 from sklearn.pipeline import Pipeline
@@ -16,7 +17,7 @@ from hiclass import LocalClassifierPerNode, LocalClassifierPerParentNode
 import altair as alt
 import time
 import zipfile
-from utils import MMS_DATA, USER_DATA, EXAMPLE_DATA_, REF_DATA_, VISp_MET_nodes, VISp_T_nodes, filter_MMS, find_outlier_idxs
+from utils import MMS_DATA, USER_DATA, EXAMPLE_DATA_, REF_DATA_, VISp_MET_nodes, VISp_T_nodes, filter_MMS, find_outlier_idxs, param_grid_from_dict
 from patchOTDA.external import skada
 from patchOTDA.domain_adapt import PatchClampOTDA
 from functools import partial
@@ -31,8 +32,9 @@ MODELS = {
         'UnbalancedSinkhornTransport (Optimal Transport) - Unsupervised - unevenly Sampled': {'model': ot.da.UnbalancedSinkhornTransport, 'params': {'reg_e': (0., 2., 0.1), 'reg_m': (0., 2., 0.1), 'max_iter': (10, 10000, 1000), 'norm': [None, 'median', 'max'], 'verbose': False}, 'Description':''},
         'JDOT (Joint Distribution Optimal Transport) - Semisupervised - unevenly Sampled': {'model': skada.JDOTC, 'params': {'alpha': (0, 10, 0.1), 'n_iter_max': (10, 10000, 1000)}, 'Description':''}}
 
-CLASS_MODELS = {'XGBoost': {'model': xgb.XGBClassifier, 'params': {'n_estimators': (1, 1000, 100), 'max_depth':(1, 100, 2), 'learning_rate':(0.0, 1.0, 0.1)}, 'Description':''},
-                'Random Forest': {'model': RandomForestClassifier, 'params': {'n_estimators': (1, 1000, 100), 'max_depth': [50, None, 3, 5, 25, 100, 200], 'min_samples_split':(1, 100, 2), 'min_samples_leaf':(1, 100, 2), 'min_impurity_decrease':(0.0, 100., 0.0)}, 'Description':''},
+CLASS_MODELS = {'Random Forest': {'model': RandomForestClassifier, 'params': {'n_estimators': (1, 1000, 100), 'max_depth': [50, None, 3, 5, 25, 100, 200], 'min_samples_split':(1, 100, 2), 'min_samples_leaf':(1, 100, 2), 'min_impurity_decrease':(0.0, 100., 0.0)}, 'Description':''},
+                'XGBoost': {'model': xgb.XGBClassifier, 'params': {'n_estimators': (1, 1000, 100), 'max_depth':(1, 100, 2), 'learning_rate':(0.0, 1.0, 0.1)}, 'Description':''},
+                
                 "Logistic Regression": {'model': LogisticRegression, 'params': {'C': (0., 1., 1.0), 'penalty': ['l2', 'l1', 'elasticnet']}, 'Description':''},
                 "SVM": {'model': SVC, 'params': {'C': (0., 1., 1.0), 'kernel': ['rbf', 'linear', 'poly', 'sigmoid']}, 'Description':''}}
 
@@ -124,6 +126,8 @@ with st.sidebar:
                 elif isinstance(value, list):
                     model_params[key] = st.selectbox(key, value)
         st.write('Classifier model parameters:') 
+        grid_search = st.checkbox('Use Grid Search', True)
+        
         if class_model is not None:
             for key, value in class_model_params.items():
                 if isinstance(value, tuple):
@@ -234,7 +238,24 @@ if run_model:
         Xs_translated = model.transform(Xs_train)
         Xs_test_translated = model.transform(Xs_test)
         hiclass = LocalClassifierPerNode(CLASS_MODELS[class_model]['model'](**class_model_params))
-        hiclass.fit(Xt_train, Yt_train)
+        
+        #grid search
+        if grid_search:
+            st.write("Grid searching ...")
+            #JDOT is a bit of a nightmare so we will just use the nested model
+            class dummy_cv_grid(LocalClassifierPerNode): #this is a hack to get around the fact that the gridsearchcv does not like the LocalClassifierPerNode
+                def __init__(self, **kwargs):
+                    super().__init__(CLASS_MODELS[class_model]['model'](**kwargs))
+
+            #make a parameter grid
+            grid_params = param_grid_from_dict(class_model_params)
+            searcher = GridSearchCV(dummy_cv_grid(), param_grid=grid_params, scoring=accuracy_score, cv=5, n_jobs=-1)
+            searcher.fit(Xt_test, Yt_test[:,-1])
+            hiclass = searcher.best_estimator_
+            hiclass.fit(Xt_train, Yt_train)
+        else:
+            hiclass.fit(Xt_train, Yt_train)
+
 
         st.write("Predicting ...")
         #if the model is JDOT we can predict the labels
