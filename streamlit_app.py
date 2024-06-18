@@ -17,7 +17,7 @@ from hiclass import LocalClassifierPerNode, LocalClassifierPerParentNode, LocalC
 import altair as alt
 import time
 import zipfile
-#from utils import MMS_DATA, USER_DATA, EXAMPLE_DATA_, REF_DATA_, VISp_MET_nodes, VISp_T_nodes, filter_MMS, find_outlier_idxs, param_grid_from_dict
+from utils import MMS_DATA, USER_DATA, EXAMPLE_DATA_, REF_DATA_, VISp_MET_nodes, VISp_T_nodes, filter_MMS, find_outlier_idxs, param_grid_from_dict
 import os
 from patchOTDA.external import skada
 from patchOTDA.domain_adapt import PatchClampOTDA
@@ -44,9 +44,9 @@ SCALERS = {'Standard Scaler': StandardScaler, 'MinMax Scaler': MinMaxScaler}
 # Page title
 st.set_page_config(page_title='PATCHOTDA: Map My Spikes Challenge 2024 - Smestern Entry', page_icon='')
 st.title('PATCHOTDA: Map My Spikes Challenge 2024 - Smestern Entry')
-st.write(os.getcwd())
-st.write(os.path.abspath(__file__))
-st.write(os.listdir())
+# st.write(os.getcwd())
+# st.write(os.path.abspath(__file__))
+# st.write(os.listdir())
 
 with st.expander('About this app'):
   st.markdown('**What can this app do?**')
