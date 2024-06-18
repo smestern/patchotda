@@ -140,7 +140,7 @@ def param_grid_from_dict(param_dict):
     return_dict = {}
     for key, value in param_dict.items():
         if isinstance(value, tuple):
-            return_dict[key] = np.linspace(value[0], value[1], 10).astype(np.float32)
+            return_dict[key] = np.linspace(value[0], value[1], 5).astype(type(value[0]))
         elif isinstance(value, bool):
             return_dict[key] = np.array([True, False])
         elif isinstance(value, list):
@@ -148,6 +148,7 @@ def param_grid_from_dict(param_dict):
     
     return return_dict
 
+param_grid_from_dict({'n_estimators': (1, 1000, 100), 'max_depth': [50, None, 3, 5, 25, 100, 200], 'min_samples_split':(1, 100, 2), 'min_samples_leaf':(1, 100, 2), 'min_impurity_decrease':(0.0, 100., 0.0)})
 
 def find_outlier_idxs(X, n_outliers=10):
     #find the outliers

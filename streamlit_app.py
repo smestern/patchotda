@@ -11,7 +11,7 @@ from sklearn.impute import SimpleImputer, KNNImputer
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression 
 from sklearn.svm import SVC
-from hiclass import LocalClassifierPerNode, LocalClassifierPerParentNode
+from hiclass import LocalClassifierPerNode, LocalClassifierPerParentNode, LocalClassifierPerLevel
 #import XGBoost as xgb
 #other
 import altair as alt
@@ -112,7 +112,7 @@ with st.sidebar:
     model = st.selectbox('Select Domain Adaptation model', list(MODELS.keys()))
     model_params = MODELS[model]['params']
     class_model = st.selectbox('Select Classifier model', list(CLASS_MODELS.keys()))
-    class_model_params = CLASS_MODELS[class_model]['params']
+    class_model_params = CLASS_MODELS[class_model]['params'].copy()
     st.subheader('2.3. Learning Parameters')
     with st.expander('See parameters', expanded=False):
         #get from model
@@ -127,7 +127,6 @@ with st.sidebar:
                     model_params[key] = st.selectbox(key, value)
         st.write('Classifier model parameters:') 
         grid_search = st.checkbox('Use Grid Search', True)
-        
         if class_model is not None:
             for key, value in class_model_params.items():
                 if isinstance(value, tuple):
@@ -237,21 +236,26 @@ if run_model:
         st.write("Training nested model ...")
         Xs_translated = model.transform(Xs_train)
         Xs_test_translated = model.transform(Xs_test)
-        hiclass = LocalClassifierPerNode(CLASS_MODELS[class_model]['model'](**class_model_params))
+        hiclass = LocalClassifierPerLevel(CLASS_MODELS[class_model]['model'](**class_model_params))
         
         #grid search
         if grid_search:
             st.write("Grid searching ...")
             #JDOT is a bit of a nightmare so we will just use the nested model
-            class dummy_cv_grid(LocalClassifierPerNode): #this is a hack to get around the fact that the gridsearchcv does not like the LocalClassifierPerNode
+            class dummy_cv_grid(LocalClassifierPerLevel): #this is a hack to get around the fact that the gridsearchcv does not like the LocalClassifierPerNode
                 def __init__(self, **kwargs):
                     super().__init__(CLASS_MODELS[class_model]['model'](**kwargs))
+                def set_params(self, **params):
+                    return super().__init__(CLASS_MODELS[class_model]['model'](**params))
 
             #make a parameter grid
-            grid_params = param_grid_from_dict(class_model_params)
-            searcher = GridSearchCV(dummy_cv_grid(), param_grid=grid_params, scoring=accuracy_score, cv=5, n_jobs=-1)
+
+            grid_params = param_grid_from_dict(CLASS_MODELS[class_model]['params'])
+            st.write(grid_params)
+            searcher = GridSearchCV(CLASS_MODELS[class_model]['model'](), param_grid=grid_params, scoring=accuracy_score, cv=5, n_jobs=-1, verbose=1)
             searcher.fit(Xt_test, Yt_test[:,-1])
             hiclass = searcher.best_estimator_
+            st.write(searcher.best_params_)
             hiclass.fit(Xt_train, Yt_train)
         else:
             hiclass.fit(Xt_train, Yt_train)
