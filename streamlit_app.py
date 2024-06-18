@@ -17,7 +17,7 @@ from hiclass import LocalClassifierPerNode, LocalClassifierPerParentNode, LocalC
 import altair as alt
 import time
 import zipfile
-from utils import MMS_DATA, USER_DATA, EXAMPLE_DATA_, REF_DATA_, VISp_MET_nodes, VISp_T_nodes, filter_MMS, find_outlier_idxs, param_grid_from_dict
+from utils import MMS_DATA, USER_DATA, EXAMPLE_DATA_, REF_DATA_, VISp_MET_nodes, VISp_T_nodes, filter_MMS, find_outlier_idxs, param_grid_from_dict, select_by_col, not_select_by_col
 import os
 from patchOTDA.external import skada
 from patchOTDA.domain_adapt import PatchClampOTDA
@@ -82,7 +82,20 @@ with st.sidebar:
 
     st.markdown('**1. Use custom data**')
     uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
-    
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file, index_col=0)
+        dataset_selected = 'User Data'
+        USER_DATA[dataset_selected] = {}
+        #split into ephys and meta
+        #df_ephys, df_meta = select_by_col(df, MMS_DATA['joint_feats']), not_select_by_col(df, MMS_DATA['joint_feats'])
+        USER_DATA[dataset_selected]['feat_matching'] = {}
+        with st.expander('Feature Matching'):
+            for feature in MMS_DATA['joint_feats']:
+                if feature not in df.columns:  
+                    USER_DATA[dataset_selected]['feat_matching'][feature] = st.selectbox(f"Select feature for {feature}", ['None', *df.columns])
+                else:
+                    USER_DATA[dataset_selected]['feat_matching'][feature] = st.selectbox(f"Select feature for {feature}", df.columns, index=int(np.where(df.columns == feature)[0][0]))
+        
     # Select example data
     st.markdown('**1.2. Use example data**')
     dataset_selected = st.selectbox('Select data to map', EXAMPLE_DATA_)
@@ -160,9 +173,19 @@ if run_model:
         st.write("Loading data...")
         #prepare the data, filter the reference data if needed
         if uploaded_file is not None:
-            df = pd.read_csv(uploaded_file)
+            #df = pd.read_csv(uploaded_file, index_col=0)
+            dataset_selected = 'User Data'
+            #rename the columns based on the feature matching
+            for key, value in USER_DATA[dataset_selected]['feat_matching'].items():
+                if value != 'None':
+                    df.rename(columns={value: key}, inplace=True)
             #split into ephys and meta
-
+            df_ephys, df_meta = select_by_col(df, MMS_DATA['joint_feats']), not_select_by_col(df, MMS_DATA['joint_feats'])
+            USER_DATA[dataset_selected] = {'ephys': df_ephys, 'meta': df_meta}
+            st.write(df.head())
+            st.write("User data loaded")
+            #ask for matching features
+            st.warning("please verify the features match the example data, rerun the app if they do not match.")
         elif example_data:
             df = MMS_DATA[dataset_selected]
             USER_DATA[dataset_selected] = MMS_DATA[dataset_selected]
@@ -190,7 +213,7 @@ if run_model:
 
         MMS_DATA[ref_data_name]['pipeline'] = Pipeline([('imputer', KNNImputer()), ('scaler', StandardScaler())])
         USER_DATA[dataset_selected]['pipeline'] = Pipeline([('imputer', KNNImputer()), ('scaler', StandardScaler())])
-        USER_DATA[dataset_selected] = MMS_DATA[dataset_selected]
+        #USER_DATA[dataset_selected] = MMS_DATA[dataset_selected]
         Xt, Yt = ref_data_ephys, ref_data_meta[[labels+"_1_en", labels+"_2_en", labels+"_3_en"]]
         Yt = Yt.to_numpy()
         #remove outliers

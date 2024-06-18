@@ -123,7 +123,19 @@ for data in REF_DATA_:
 
         
         
+def select_by_col(df, cols):
+    if isinstance(cols, str):
+        cols = [cols]
+    df_cols = df.columns
+    union = np.intersect1d(cols, df_cols)
+    return df[union]
 
+def not_select_by_col(df, cols):
+    if isinstance(cols, str):
+        cols = [cols]
+    df_cols = df.columns
+    set_diff = np.setdiff1d(df_cols, cols)
+    return df[set_diff]
 
 
 
