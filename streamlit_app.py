@@ -23,6 +23,7 @@ from patchOTDA.external import skada
 from patchOTDA.domain_adapt import PatchClampOTDA
 from functools import partial
 import ot.da
+from ot.backend import get_backend
 import umap
 from streamlit_tree_select import tree_select
 import xgboost as xgb
@@ -42,8 +43,8 @@ CLASS_MODELS = {'Random Forest': {'model': RandomForestClassifier, 'params': {'n
 SCALERS = {'Standard Scaler': StandardScaler, 'MinMax Scaler': MinMaxScaler}
 
 # Page title
-st.set_page_config(page_title='PATCHOTDA: Map My Spikes Challenge 2024 - Smestern Entry', page_icon='')
-st.title('PATCHOTDA: Map My Spikes Challenge 2024 - Smestern Entry')
+st.set_page_config(page_title='PATCHOTDA: Map My Spikes Challenge 2024', page_icon='')
+st.title('PATCHOTDA: Map My Spikes Challenge 2024')
 
 
 with st.expander('About this app'):
@@ -257,6 +258,12 @@ if run_model:
             model.fit(Xs=Xs_train, Xt=Xt_train)
         elif "L1" in model.__class__.__name__:
             model.fit(Xs=Xs_train, Xt=Xt_train, Ys=Ys_train, Yt=Yt_train)
+        elif 'UnbalancedSinkhornTransport' in model.__class__.__name__:
+            model.fit(Xs=Xs_train, Xt=Xt_train)
+            model.nx = get_backend(Xs_train)
+        else:
+            model.fit(Xs=Xs_train, Xt=Xt_train)
+            #
             
         #now train our hiclass model
         st.write("Training nested model ...")

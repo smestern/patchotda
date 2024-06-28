@@ -41,6 +41,21 @@ def test_filter_MMS():
   "expanded": []
 } )
 
+def test_ub_sink():
+    import ot
+    from ot.datasets import make_2D_samples_gauss
+    OT = ot.da.UnbalancedSinkhornTransport()
+    Xs = make_2D_samples_gauss(n=1000, m=1000, sigma=[[2, 1], [1, 2]], random_state=42)
+    Xt = make_2D_samples_gauss(n=1000, m=1000, sigma=[[2, 1], [1, 2]], random_state=42)[0]
+    Xs = Xs.astype('float32')
+    Xt = Xs + 0.5
+    Xt = Xt.astype('float32')
+    OT.fit(Xs, Xt)
+    OT.transform(Xs)
+    return OT
+
+
 if __name__ == '__main__':
+    test_ub_sink()
     test_filter_MMS()
     print("Passed all tests!")
