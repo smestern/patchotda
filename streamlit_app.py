@@ -20,7 +20,7 @@ import zipfile
 from utils import MMS_DATA, USER_DATA, EXAMPLE_DATA_, REF_DATA_, VISp_MET_nodes, VISp_T_nodes, filter_MMS, find_outlier_idxs, param_grid_from_dict, select_by_col, not_select_by_col
 import os
 from patchOTDA.external import skada
-from patchOTDA.domain_adapt import PatchClampOTDA
+from patchOTDA.domainAdapt import PatchClampOTDA
 from functools import partial
 import ot.da
 from ot.backend import get_backend
