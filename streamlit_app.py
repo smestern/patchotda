@@ -55,12 +55,12 @@ with st.expander('About this app'):
 
   st.markdown('**How to use the app?**')
   st.markdown('''One can upload their own data or use the example data sets provided. The user can select the reference data and the labels to be used for the label propagation. 
-            Its recommended to select the only the reference labels that are relevant to the user data.
-            E.g. If the user data is from Sst, subselect the Sst labels.
-            Next select the domain adaptation model and the classifier model. For domain Adaptation, the user can select from the following models:
-                - EMDLaplace (EMD based distance transport) - Fully Unsupervised optimal transport regularizated by the laplacian. Recommended for evenly sampled data from the same distribution (E.g. All Cortex data)
-                - UnbalancedSinkhornTransport (Optimal Transport) - Fully Unsupervised optimal transport regularizated by the mass. Recommended for unevenly sampled data from the same distribution (E.g. All Cortex data, majority Sst in the sample data)
-                - JDOT (Joint Distribution Optimal Transport) - Semi-supervised optimal transport regularizated by the laplacian. Recommended for unevenly sampled data. *Can be finicky* (E.g. Cortex and Thalamus data)
+            Its recommended to select the only the reference labels that are relevant to the user data.  
+            E.g. If the user data is from Sst, subselect the Sst labels.  
+            Next select the domain adaptation model and the classifier model. For domain Adaptation, the user can select from the following models:  
+            - *EMDLaplace (EMD based distance transport)* - Fully Unsupervised optimal transport regularizated by the laplacian. Recommended for evenly sampled data from the same distribution (E.g. All Cortex data)  
+            - *UnbalancedSinkhornTransport (Optimal Transport)* - Fully Unsupervised optimal transport regularizated by the mass. Recommended for unevenly sampled data from the same distribution (E.g. All Cortex data, majority Sst in the sample data)  
+            - *JDOT (Joint Distribution Optimal Transport)* - Semi-supervised optimal transport regularizated by the laplacian. Recommended for unevenly sampled data. *Can be finicky* (E.g. Cortex and Thalamus data)    
 
             ''')
 
