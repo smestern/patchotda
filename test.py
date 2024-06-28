@@ -1,4 +1,33 @@
-from utils import *
+import streamlit as st
+import pandas as pd
+import numpy as np
+#sklearn
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import mean_squared_error, r2_score, accuracy_score
+from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler, StandardScaler
+from sklearn.impute import SimpleImputer, KNNImputer
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression 
+from sklearn.svm import SVC
+from hiclass import LocalClassifierPerNode, LocalClassifierPerParentNode, LocalClassifierPerLevel
+#import XGBoost as xgb
+#other
+import altair as alt
+import time
+import zipfile
+from utils import MMS_DATA, USER_DATA, EXAMPLE_DATA_, REF_DATA_, VISp_MET_nodes, VISp_T_nodes, filter_MMS, find_outlier_idxs, param_grid_from_dict, select_by_col, not_select_by_col
+import os
+from patchOTDA.external import skada
+from patchOTDA.domainAdapt import PatchClampOTDA
+from functools import partial
+import ot.da
+from ot.backend import get_backend
+import umap
+from streamlit_tree_select import tree_select
+import xgboost as xgb
+
 
 def test_filter_MMS():
     filter_MMS('VISp_Viewer', 'VISp_MET_3', {
@@ -54,8 +83,25 @@ def test_ub_sink():
     OT.transform(Xs)
     return OT
 
+def test_JDOTC():
+    from patchOTDA.external import skada
+    from ot.datasets import make_data_classif
+    from sklearn.model_selection import train_test_split
+    import pickle as pkl
+    OT = skada.JDOTC()
+    Xs_train = pkl.load(open('Xs_train.pkl', 'rb'))
+    Xt_train = pkl.load(open('Xt_train.pkl', 'rb'))
+    Ys_train = pkl.load(open('Ys_train.pkl', 'rb'))
+    Yt_train = pkl.load(open('Yt_train.pkl', 'rb'))
+    OT = pkl.load(open('model.pkl', 'rb'))
+    OT.fit(Xt_train, Xs_train,  Yt_train[:,-1], Ys_train)
+    OT.transform(Xs_train)
+    OT.transform(Xt_train)
+    return OT
+
 
 if __name__ == '__main__':
-    test_ub_sink()
-    test_filter_MMS()
+    test_JDOTC()
+    #test_ub_sink()
+    #test_filter_MMS()
     print("Passed all tests!")

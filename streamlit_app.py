@@ -32,13 +32,15 @@ import xgboost as xgb
 MODELS = {
         'EMDLaplace (EMD based distance transport) - Unsupervised': {'model': ot.da.EMDLaplaceTransport, 'params': {'reg_lap': (0., 10., 10.), 'reg_src':(0., 10., 0.9), 'norm': ['median', None,  'max'], 'verbose': False}, 'Description':''},
         'UnbalancedSinkhornTransport (Optimal Transport) - Unsupervised - unevenly Sampled': {'model': ot.da.UnbalancedSinkhornTransport, 'params': {'reg_e': (0., 2., 0.1), 'reg_m': (0., 2., 0.1), 'max_iter': (10, 10000, 1000), 'norm': [None, 'median', 'max'], 'verbose': False}, 'Description':''},
-        'JDOT (Joint Distribution Optimal Transport) - Semisupervised - unevenly Sampled': {'model': skada.JDOTC, 'params': {'alpha': (0, 10, 0.1), 'n_iter_max': (10, 10000, 1000)}, 'Description':''}}
+        'JDOT (Joint Distribution Optimal Transport) - Semisupervised - unevenly Sampled': {'model': skada.JDOTC, 'params': {'alpha': (0., 10., 0.1), 'n_iter_max': (10, 10000, 1000)}, 'Description':''}}
 
 CLASS_MODELS = {'Random Forest': {'model': RandomForestClassifier, 'params': {'n_estimators': (1, 1000, 100, 3), 'max_depth': [50, None, 3, 5, 25, 100, 200], 'min_samples_split':(1, 100, 2, 3), 'min_samples_leaf':(1, 100, 2), 'min_impurity_decrease':(0.0, 100., 0.0, 3)}, 'Description':''},
                 'XGBoost': {'model': xgb.XGBClassifier, 'params': {'n_estimators': (1, 1000, 100, 3), 'max_depth':(1, 100, 2, 4), 'learning_rate':(0.0, 1.0, 0.1, 4)}, 'Description':''},
                 
-                "Logistic Regression": {'model': LogisticRegression, 'params': {'C': (0., 1., 1.0, 4), 'penalty': ['l2', 'l1', 'elasticnet']}, 'Description':''},
+                "Logistic Regression": {'model': LogisticRegression, 'params': {'C': (0., 1., 1.0, 4), 'penalty': ['l2', 'l1', 'elasticnet'], 'solver':['saga', 'sag'], 'l1_ratio': [None, 0.1, 0.3, 0.5, 0.75, 0.9]}, 'Description':''},
                 "SVM": {'model': SVC, 'params': {'C': (0., 1., 1.0, 4), 'kernel': ['rbf', 'linear', 'poly', 'sigmoid']}, 'Description':''}}
+
+HICLASS_METHOD = {'LocalClassifierPerNode': LocalClassifierPerNode, 'LocalClassifierPerParentNode': LocalClassifierPerParentNode, 'LocalClassifierPerLevel': LocalClassifierPerLevel}
 
 SCALERS = {'Standard Scaler': StandardScaler, 'MinMax Scaler': MinMaxScaler}
 
@@ -155,7 +157,8 @@ with st.sidebar:
                     class_model_params[key] = st.slider(key, 0, 1000, value, 1)
                 elif isinstance(value, float):
                     class_model_params[key] = st.slider(key, 0.0, 1.0, value, 0.01)
-    
+        st.write('Hierarchical Classifier model parameters:')
+        hiclass_method = st.selectbox('Select Hierarchical Classifier model', list(HICLASS_METHOD.keys()))
 
     st.subheader('2.4. General Parameters')
     with st.expander('See parameters', expanded=False):
@@ -250,32 +253,32 @@ if run_model:
             Xt_test = MMS_DATA[ref_data_name]['pipeline'].transform(Xt_test)
 
         st.write("Model training ... May take several minutes...")
-
+        #fit the model
         model = MODELS[model]['model'](**model_params)
         if 'JDOT' in model.__class__.__name__:
-            model.fit(Xs_train, Xt_train, Ys_train, Yt_train[:,-1])
+            st.write("Fitting JDOTC model ...")
+            model.fit(Xt_train, Xs_train, Yt_train[:,-1], Ys_train)
         elif 'EMDLaplace' in model.__class__.__name__:
             model.fit(Xs=Xs_train, Xt=Xt_train)
         elif "L1" in model.__class__.__name__:
             model.fit(Xs=Xs_train, Xt=Xt_train, Ys=Ys_train, Yt=Yt_train)
         elif 'UnbalancedSinkhornTransport' in model.__class__.__name__:
             model.fit(Xs=Xs_train, Xt=Xt_train)
-            model.nx = get_backend(Xs_train)
+            model.nx = get_backend(Xs_train) #bug in POT
         else:
+            st.write("Fitting model ...")
             model.fit(Xs=Xs_train, Xt=Xt_train)
-            #
-            
         #now train our hiclass model
         st.write("Training nested model ...")
         Xs_translated = model.transform(Xs_train)
         Xs_test_translated = model.transform(Xs_test)
-        hiclass = LocalClassifierPerLevel(CLASS_MODELS[class_model]['model'](**class_model_params))
+        hiclass = HICLASS_METHOD[hiclass_method](CLASS_MODELS[class_model]['model'](**class_model_params))
         
         #grid search
         if grid_search:
             st.write("Grid searching ...")
             #JDOT is a bit of a nightmare so we will just use the nested model
-            class dummy_cv_grid(LocalClassifierPerLevel): #this is a hack to get around the fact that the gridsearchcv does not like the LocalClassifierPerNode
+            class dummy_cv_grid(HICLASS_METHOD[hiclass_method]): #this is a hack to get around the fact that the gridsearchcv does not like the LocalClassifierPerNode
                 def __init__(self, **kwargs):
                     super().__init__(CLASS_MODELS[class_model]['model'](**kwargs))
                 def set_params(self, **params):
@@ -293,7 +296,7 @@ if run_model:
         else:
             hiclass.fit(Xt_train, Yt_train)
 
-
+        
         st.write("Predicting ...")
         #if the model is JDOT we can predict the labels
         if 'JDOT' in model.__class__.__name__ and parameter_use_jdot:
