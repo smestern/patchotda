@@ -389,8 +389,8 @@ if run_model:
 
         
     #make a joint df of the translated data
-    Xt_scaled_inverted = MMS_DATA[ref_data_name]['pipeline'].inverse_transform(Xt_scaled_full)
-    Xs_scaled_inverted = USER_DATA[dataset_selected]['pipeline'].inverse_transform(Xs_translated_full)
+    Xt_scaled_inverted = MMS_DATA[ref_data_name]['pipeline']['scaler'].inverse_transform(Xt_scaled_full)
+    Xs_scaled_inverted = USER_DATA[dataset_selected]['pipeline']['scaler'].inverse_transform(Xs_translated_full)
     joint_df_translated = pd.DataFrame(np.vstack([Xt_scaled_inverted, Xs_scaled_inverted]), columns=common_features, index=np.hstack([ref_data_ephys.index, USER_DATA[dataset_selected]['ephys'].index]))
     joint_df_translated['label'] = np.hstack([Yt[:,0], Ys_pred_full[:,0]])
     joint_df_translated['dataset'] = np.hstack([np.full(Xt.shape[0], 'Reference'), np.full(Xs.shape[0], 'User')])
