@@ -34,7 +34,7 @@ MODELS = {
         'UnbalancedSinkhornTransport (Optimal Transport) - Unsupervised - unevenly Sampled': {'model': ot.da.UnbalancedSinkhornTransport, 'params': {'reg_e': (0., 2., 0.1), 'reg_m': (0., 2., 0.1), 'max_iter': (10, 10000, 1000), 'norm': [None, 'median', 'max'], 'verbose': False}, 'Description':''},
         'JDOT (Joint Distribution Optimal Transport) - Semisupervised - unevenly Sampled': {'model': skada.JDOTC, 'params': {'alpha': (0., 10., 0.1), 'n_iter_max': (10, 10000, 1000)}, 'Description':''}}
 
-CLASS_MODELS = {'Random Forest': {'model': RandomForestClassifier, 'params': {'n_estimators': (1, 1000, 100, 3), 'max_depth': [50, None, 3, 5, 25, 100, 200], 'min_samples_split':(1, 100, 2, 3), 'min_samples_leaf':(1, 100, 2), 'min_impurity_decrease':(0.0, 100., 0.0, 3)}, 'Description':''},
+CLASS_MODELS = {'Random Forest': {'model': RandomForestClassifier, 'params': {'n_estimators': (1, 1000, 100, 3), 'max_depth': [50, None, 3, 5, 25, 100, 200], 'min_samples_split':(2, 100, 2, 3), 'min_samples_leaf':(1, 100, 2), 'min_impurity_decrease':(0.0, 1., 0.0, 3)}, 'Description':''},
                 'XGBoost': {'model': xgb.XGBClassifier, 'params': {'n_estimators': (1, 1000, 100, 3), 'max_depth':(1, 100, 2, 4), 'learning_rate':(0.0, 1.0, 0.1, 4)}, 'Description':''},
                 
                 "Logistic Regression": {'model': LogisticRegression, 'params': {'C': (0., 1., 1.0, 4), 'penalty': ['l2', 'l1', 'elasticnet'], 'solver':['saga', 'sag'], 'l1_ratio': [None, 0.1, 0.3, 0.5, 0.75, 0.9]}, 'Description':''},
