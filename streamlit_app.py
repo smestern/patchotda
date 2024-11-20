@@ -378,6 +378,13 @@ if run_model:
     #make a joint df
     joint_df = pd.DataFrame(np.vstack([Xt, Xs]), columns=common_features, index=np.hstack([ref_data_ephys.index, USER_DATA[dataset_selected]['ephys'].index]))
     joint_df['label'] = np.hstack([Yt[:,0], Ys_pred_full[:,0]])
+    joint_df['dataset'] = np.hstack([np.full(Xt.shape[0], 'Reference'), np.full(Xs.shape[0], 'User')])
+    joint_df['label_level_1'] = np.hstack([Yt_pred_full[:,0], Ys_pred_full[:,0]])
+    joint_df['label_level_2'] = np.hstack([Yt_pred_full[:,1], Ys_pred_full[:,1]])
+    joint_df['label_level_3'] = np.hstack([Yt_pred_full[:,2], Ys_pred_full[:,2]])
+    joint_df['label'] = joint_df['label'].astype(str)
+    joint_df['UMAP1'] = np.hstack([Xt_embedded[:,0], Xs_embedded[:,0]])
+    joint_df['UMAP2'] = np.hstack([Xt_embedded[:,1], Xs_embedded[:,1]])
     st.download_button('Download Joint Data', joint_df.to_csv(), 'joint_data.csv', 'text/csv')
 
         
