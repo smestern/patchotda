@@ -388,6 +388,19 @@ if run_model:
     st.download_button('Download Joint Data', joint_df.to_csv(), 'joint_data.csv', 'text/csv')
 
         
+    #make a joint df of the translated data
+    Xt_scaled_inverted = MMS_DATA[ref_data_name]['pipeline'].inverse_transform(Xt_scaled_full)
+    Xs_scaled_inverted = USER_DATA[dataset_selected]['pipeline'].inverse_transform(Xs_translated_full)
+    joint_df_translated = pd.DataFrame(np.vstack([Xt_scaled_inverted, Xs_scaled_inverted]), columns=common_features, index=np.hstack([ref_data_ephys.index, USER_DATA[dataset_selected]['ephys'].index]))
+    joint_df_translated['label'] = np.hstack([Yt[:,0], Ys_pred_full[:,0]])
+    joint_df_translated['dataset'] = np.hstack([np.full(Xt.shape[0], 'Reference'), np.full(Xs.shape[0], 'User')])
+    joint_df_translated['label_level_1'] = np.hstack([Yt_pred_full[:,0], Ys_pred_full[:,0]])
+    joint_df_translated['label_level_2'] = np.hstack([Yt_pred_full[:,1], Ys_pred_full[:,1]])
+    joint_df_translated['label_level_3'] = np.hstack([Yt_pred_full[:,2], Ys_pred_full[:,2]])
+    joint_df_translated['label'] = joint_df_translated['label'].astype(str)
+    st.download_button('Download Translated Data', joint_df_translated.to_csv(), 'translated_data.csv', 'text/csv')
+
+
     status.update(label="Status", state="complete", expanded=False)
 
 
