@@ -6,5 +6,5 @@ streamlit-tree-select
 umap-learn
 hiclass
 xgboost
-git+https://github.com/scikit-adaptation/skada
+skada<=0.3.0
 git+https://github.com/smestern/pypatchOTDA.git
